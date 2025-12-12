@@ -1,7 +1,8 @@
-import "./App.css";
-
-function App() {
-  return <></>;
+import { FieldLayout } from "./components/FieldLayout/FieldLayout";
+export default function App() {
+  return (
+    <>
+      <FieldLayout />
+    </>
+  );
 }
-
-export default App;

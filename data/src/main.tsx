@@ -3,11 +3,16 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
+import { DndProvider } from "react-dnd";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 createRoot(document.getElementById("root")!).render(
   <ChakraProvider value={defaultSystem}>
-    <StrictMode>
-      <App />
-    </StrictMode>
+    <DndProvider backend={HTML5Backend}>
+      <StrictMode>
+        <App />
+      </StrictMode>
+    </DndProvider>
   </ChakraProvider>
 );
