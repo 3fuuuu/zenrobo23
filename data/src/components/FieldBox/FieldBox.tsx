@@ -5,103 +5,135 @@ import type { BoxSpec, Position } from "./BoxType";
 type Props = {
   spec: BoxSpec;
   position: Position;
+  rotation: number;
   scale: number;
   fieldSize_mm: number;
   onMove: (pos: Position) => void;
+  onRotate: (deg: number) => void;
 };
 
 export const FieldBox = ({
   spec,
   position,
+  rotation,
   scale,
   fieldSize_mm,
   onMove,
+  onRotate,
 }: Props) => {
-  const sizePx_x = spec.sizeMm.x * scale;
-  const sizePx_y = spec.sizeMm.y * scale;
+  const sizePxX = spec.sizeMm.x * scale;
+  const sizePxY = spec.sizeMm.y * scale;
 
   const leftPx = position.x * scale;
   const bottomPx = position.y * scale;
 
   const [dragging, setDragging] = useState(false);
+  const [rotating, setRotating] = useState(false);
 
-  const offsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const startAngleRef = useRef(0);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
     const rect = e.currentTarget.getBoundingClientRect();
-    offsetRef.current = {
-      x: e.clientX - rect.left,
-      y: rect.bottom - e.clientY,
-    };
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    if (e.shiftKey) {
+      setRotating(true);
+      startAngleRef.current =
+        Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI) - rotation;
+    } else {
+      offsetRef.current = {
+        x: e.clientX - rect.left,
+        y: rect.bottom - e.clientY,
+      };
+      setDragging(true);
+    }
 
     e.currentTarget.setPointerCapture(e.pointerId);
-    setDragging(true);
   };
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      const el = e.currentTarget;
+      const rect = el.getBoundingClientRect();
+
+      if (rotating) {
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const angle =
+          Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI);
+        onRotate(Math.round(angle - startAngleRef.current));
+        return;
+      }
+
       if (!dragging || e.buttons !== 1) return;
 
-      const field = e.currentTarget.parentElement as HTMLDivElement;
+      const field = el.parentElement as HTMLDivElement;
       const fieldRect = field.getBoundingClientRect();
 
-      const x_px = e.clientX - fieldRect.left - offsetRef.current.x;
-      const y_px = fieldRect.bottom - e.clientY - offsetRef.current.y;
+      const xPx = e.clientX - fieldRect.left - offsetRef.current.x;
+      const yPx = fieldRect.bottom - e.clientY - offsetRef.current.y;
 
-      const x_mm = Math.max(
+      const xMm = Math.max(
         0,
-        Math.min(fieldSize_mm - spec.sizeMm.x, x_px / scale)
+        Math.min(fieldSize_mm - spec.sizeMm.x, xPx / scale)
       );
-      const y_mm = Math.max(
+      const yMm = Math.max(
         0,
-        Math.min(fieldSize_mm - spec.sizeMm.y, y_px / scale)
+        Math.min(fieldSize_mm - spec.sizeMm.y, yPx / scale)
       );
-      onMove({ x: x_mm, y: y_mm });
+
+      onMove({ x: xMm, y: yMm });
     },
-    [dragging, fieldSize_mm, scale, spec, onMove]
+    [dragging, rotating, fieldSize_mm, scale, spec, onMove, onRotate]
   );
 
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.releasePointerCapture(e.pointerId);
     setDragging(false);
+    setRotating(false);
   };
 
   return (
     <Box
       position="absolute"
-      left={leftPx}
-      bottom={bottomPx}
-      w={sizePx_x}
-      h={sizePx_y}
-      bg="orange"
+      left={`${leftPx}px`}
+      bottom={`${bottomPx}px`}
+      width={`${sizePxX}px`}
+      height={`${sizePxY}px`}
+      bg={spec.color}
       border="2px solid white"
-      opacity={0.9}
-      cursor="grab"
+      transform={`rotate(${rotation}deg)`}
+      transformOrigin="center"
+      cursor={rotating ? "crosshair" : "grab"}
       userSelect="none"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
     >
-      <Text fontWeight="bold" textAlign="center">
+      <Text fontWeight="bold" textAlign="center" color="white">
         {spec.type}
       </Text>
 
-      {dragging && (
+      {(dragging || rotating) && (
         <Box
           position="absolute"
-          bottom="2px"
           left="2px"
+          bottom="2px"
           bg="rgba(0,0,0,0.6)"
           color="white"
           fontSize="10px"
           px={1}
           borderRadius="sm"
         >
-          x:{position.x.toFixed(0)} mm
+          x:{position.x.toFixed(0)}
           <br />
-          y:{position.y.toFixed(0)} mm
+          y:{position.y.toFixed(0)}
+          <br />
+          r:{rotation}°
         </Box>
       )}
     </Box>

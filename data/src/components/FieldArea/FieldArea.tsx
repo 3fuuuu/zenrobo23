@@ -7,7 +7,7 @@ type Props = {
   setBoxes: React.Dispatch<React.SetStateAction<FieldBoxState[]>>;
 };
 export const FieldArea = ({ boxes, setBoxes }: Props) => {
-  const fieldSize_mm = 7000;
+  const fieldSize_mm = 8000;
   const scale = 0.1;
   const fieldSize_px = fieldSize_mm * scale;
 
@@ -16,7 +16,7 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
   };
 
   return (
-    <Box w={fieldSize_px} h={fieldSize_px} bg="black" position="relative">
+    <Box w={fieldSize_px} h={fieldSize_px} bg="yellow.100" position="relative">
       {boxes.map((b) => {
         const spec = BOX_SPECS[b.type];
         return (
@@ -24,9 +24,15 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
             key={b.id}
             spec={spec}
             position={b.pos}
+            rotation={b.rotation}
             scale={scale}
             fieldSize_mm={fieldSize_mm}
             onMove={(pos) => updateBoxPos(b.id, pos)}
+            onRotate={(deg) =>
+              setBoxes((prev) =>
+                prev.map((x) => (x.id === b.id ? { ...x, rotation: deg } : x))
+              )
+            }
           />
         );
       })}

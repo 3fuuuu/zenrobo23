@@ -7,28 +7,27 @@ export type FieldBoxState = {
   id: string;
   type: keyof typeof BOX_SPECS;
   pos: Position;
+  rotation: number;
 };
-
-type AddBoxEvent = CustomEvent<keyof typeof BOX_SPECS>;
 
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);
 
   useEffect(() => {
     const handler = (event: Event) => {
-      const e = event as AddBoxEvent;
-
+      const e = event as CustomEvent<keyof typeof BOX_SPECS>;
       const type = e.detail;
-      const spec = BOX_SPECS[type];
-      if (!spec) return;
+      if (!BOX_SPECS[type]) return;
 
-      const newBox: FieldBoxState = {
-        id: `${type}_${Date.now()}`,
-        type,
-        pos: { x: 0, y: 0 },
-      };
-
-      setBoxes((prev) => [...prev, newBox]);
+      setBoxes((prev) => [
+        ...prev,
+        {
+          id: `${type}_${Date.now()}`,
+          type,
+          pos: { x: 0, y: 0 },
+          rotation: 0,
+        },
+      ]);
     };
 
     window.addEventListener("ADD_BOX", handler);
@@ -36,26 +35,24 @@ export const FieldLayout = () => {
   }, []);
 
   return (
-    <Box display="flex" flexDirection="row" gap={4}>
-      <VStack w="180px" minH="700px" bg="gray.700" p={4} align="stretch">
+    <Box display="flex" width="100vw" height="100vh" overflow="hidden">
+      <VStack flex="1" minW="180px" bg="gray.700" p={4} align="stretch">
         <Text color="white" fontWeight="bold">
           Box Palette
         </Text>
 
-        {Object.keys(BOX_SPECS).map((key) => (
+        {Object.entries(BOX_SPECS).map(([key, spec]) => (
           <Box
             key={key}
-            bg="orange"
+            bg={spec.color}
             p={3}
             borderRadius="md"
             cursor="pointer"
-            _hover={{ bg: "orange.300" }}
+            color="white"
+            fontWeight="bold"
+            _hover={{ opacity: 0.8 }}
             onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent<keyof typeof BOX_SPECS>("ADD_BOX", {
-                  detail: key as keyof typeof BOX_SPECS,
-                })
-              )
+              window.dispatchEvent(new CustomEvent("ADD_BOX", { detail: key }))
             }
           >
             {key}
@@ -63,21 +60,47 @@ export const FieldLayout = () => {
         ))}
       </VStack>
 
-      <FieldArea boxes={boxes} setBoxes={setBoxes} />
+      <Box
+        flex="0 0 700px"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <FieldArea boxes={boxes} setBoxes={setBoxes} />
+      </Box>
 
-      <VStack w="250px" bg="gray.800" p={4} align="stretch">
+      <VStack
+        flex="1"
+        minW="250px"
+        minH={0}
+        bg="gray.800"
+        p={4}
+        align="stretch"
+        overflowY="auto"
+      >
         <Text color="white" fontWeight="bold">
           Box Positions
         </Text>
 
-        {boxes.map((b) => (
-          <Box key={b.id} bg="gray.600" color="white" p={2} borderRadius="md">
-            <Text>ID: {b.id}</Text>
-            <Text>Type: {b.type}</Text>
-            <Text>X: {b.pos.x.toFixed(1)} mm</Text>
-            <Text>Y: {b.pos.y.toFixed(1)} mm</Text>
-          </Box>
-        ))}
+        {boxes.map((b) => {
+          const spec = BOX_SPECS[b.type];
+
+          return (
+            <Box
+              key={b.id}
+              bg={spec.color}
+              color="white"
+              p={2}
+              borderRadius="md"
+            >
+              <Text>ID: {b.id}</Text>
+              <Text>Type: {b.type}</Text>
+              <Text>X: {b.pos.x.toFixed(1)} mm</Text>
+              <Text>Y: {b.pos.y.toFixed(1)} mm</Text>
+              <Text>R: {b.rotation}°</Text>
+            </Box>
+          );
+        })}
       </VStack>
     </Box>
   );
