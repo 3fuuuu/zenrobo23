@@ -6,12 +6,13 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { DndProvider } from "react-dnd";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { isMobile } from "react-device-detect";
 
 createRoot(document.getElementById("root")!).render(
   <ChakraProvider value={defaultSystem}>
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider backend={isMobile ? TouchBackend : HTML5Backend}>
       <StrictMode>
-        <App />
+        <App />`
       </StrictMode>
     </DndProvider>
   </ChakraProvider>
