@@ -1,7 +1,5 @@
-// FieldArea.tsx
-
 import { Box } from "@chakra-ui/react";
-import { FieldBoxState } from "../FieldLayout/FieldLayout";
+import { type FieldBoxState } from "../FieldLayout/FieldLayout";
 import { BOX_SPECS, type Position } from "../FieldBox/BoxType";
 import { FieldBox } from "../FieldBox/FieldBox";
 type Props = {
