@@ -5,15 +5,19 @@ import { FieldArea } from "../FieldArea/FieldArea";
 
 export type FieldBoxState = {
   id: string;
-  type: string;
+  type: keyof typeof BOX_SPECS;
   pos: Position;
 };
+
+type AddBoxEvent = CustomEvent<keyof typeof BOX_SPECS>;
 
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);
 
   useEffect(() => {
-    const handler = (e: any) => {
+    const handler = (event: Event) => {
+      const e = event as AddBoxEvent;
+
       const type = e.detail;
       const spec = BOX_SPECS[type];
       if (!spec) return;
@@ -33,20 +37,14 @@ export const FieldLayout = () => {
 
   return (
     <Box display="flex" flexDirection="row" gap={4}>
-      <VStack
-        w="180px"
-        minH="700px"
-        bg="gray.700"
-        p={4}
-        padding={4}
-        align="stretch"
-      >
+      <VStack w="180px" minH="700px" bg="gray.700" p={4} align="stretch">
         <Text color="white" fontWeight="bold">
           Box Palette
         </Text>
-        {Object.values(BOX_SPECS).map((spec) => (
+
+        {Object.keys(BOX_SPECS).map((key) => (
           <Box
-            key={spec.type}
+            key={key}
             bg="orange"
             p={3}
             borderRadius="md"
@@ -54,18 +52,20 @@ export const FieldLayout = () => {
             _hover={{ bg: "orange.300" }}
             onClick={() =>
               window.dispatchEvent(
-                new CustomEvent("ADD_BOX", { detail: spec.type })
+                new CustomEvent<keyof typeof BOX_SPECS>("ADD_BOX", {
+                  detail: key as keyof typeof BOX_SPECS,
+                })
               )
             }
           >
-            {spec.type}
+            {key}
           </Box>
         ))}
       </VStack>
 
       <FieldArea boxes={boxes} setBoxes={setBoxes} />
 
-      <VStack w="250px" bg="gray.800" p={4} align="stretch" padding={4}>
+      <VStack w="250px" bg="gray.800" p={4} align="stretch">
         <Text color="white" fontWeight="bold">
           Box Positions
         </Text>
