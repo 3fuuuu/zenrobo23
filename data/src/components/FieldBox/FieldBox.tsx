@@ -104,7 +104,8 @@ export const FieldBox = ({
       bottom={`${bottomPx}px`}
       width={`${sizePxX}px`}
       height={`${sizePxY}px`}
-      bg={spec.color}
+      bg={`${spec.color}`}
+      opacity={0.8}
       border="2px solid white"
       transform={`rotate(${rotation}deg)`}
       transformOrigin="center"
@@ -117,7 +118,6 @@ export const FieldBox = ({
       <Text fontWeight="bold" textAlign="center" color="white">
         {spec.type}
       </Text>
-
       {(dragging || rotating) && (
         <Box
           position="absolute"

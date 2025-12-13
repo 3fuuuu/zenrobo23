@@ -1,10 +1,10 @@
 import { Box, VStack, Text } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BOX_SPECS, type Position } from "../FieldBox/BoxType";
 import { FieldArea } from "../FieldArea/FieldArea";
 
 export type FieldBoxState = {
-  id: string;
+  id: number;
   type: keyof typeof BOX_SPECS;
   pos: Position;
   rotation: number;
@@ -13,26 +13,22 @@ export type FieldBoxState = {
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);
 
-  useEffect(() => {
-    const handler = (event: Event) => {
-      const e = event as CustomEvent<keyof typeof BOX_SPECS>;
-      const type = e.detail;
-      if (!BOX_SPECS[type]) return;
+  const addBox = (type: keyof typeof BOX_SPECS) => {
+    setBoxes((prev) => {
+      const nextId =
+        prev.length === 0 ? 1 : Math.max(...prev.map((b) => b.id)) + 1;
 
-      setBoxes((prev) => [
+      return [
         ...prev,
         {
-          id: `${type}_${Date.now()}`,
+          id: nextId,
           type,
           pos: { x: 0, y: 0 },
           rotation: 0,
         },
-      ]);
-    };
-
-    window.addEventListener("ADD_BOX", handler);
-    return () => window.removeEventListener("ADD_BOX", handler);
-  }, []);
+      ];
+    });
+  };
 
   return (
     <Box display="flex" width="100vw" height="100vh" overflow="hidden">
@@ -51,9 +47,7 @@ export const FieldLayout = () => {
             color="white"
             fontWeight="bold"
             _hover={{ opacity: 0.8 }}
-            onClick={() =>
-              window.dispatchEvent(new CustomEvent("ADD_BOX", { detail: key }))
-            }
+            onClick={() => addBox(key as keyof typeof BOX_SPECS)}
           >
             {key}
           </Box>
@@ -84,7 +78,6 @@ export const FieldLayout = () => {
 
         {boxes.map((b) => {
           const spec = BOX_SPECS[b.type];
-
           return (
             <Box
               key={b.id}
