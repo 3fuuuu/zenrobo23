@@ -32,7 +32,7 @@ export const FieldLayout = () => {
 
   return (
     <Box display="flex" width="100vw" height="100vh" overflow="hidden">
-      <VStack flex="1" minW="180px" bg="gray.700" p={4} align="stretch">
+      <VStack flex="1" minW="180px" bg="red.500" p={4} align="stretch">
         <Text color="white" fontWeight="bold">
           Box Palette
         </Text>
