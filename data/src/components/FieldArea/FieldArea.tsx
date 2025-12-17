@@ -1,7 +1,8 @@
 import { Box } from "@chakra-ui/react";
-import type { FieldBoxState } from "../FieldLayout/FieldLayout";
+import type { FieldBoxState, BoxOrientation } from "../FieldLayout/FieldLayout";
 import { BOX_SPECS, type Position } from "../FieldBox/BoxType";
 import { FieldBox } from "../FieldBox/FieldBox";
+import { getFootprintSizeMm } from "../FieldBox/utils";
 
 type Props = {
   boxes: FieldBoxState[];
@@ -19,6 +20,18 @@ const isOverlap = (
     a.y >= b.y + b.h
   );
 };
+
+const nextOrientation = (o: BoxOrientation): BoxOrientation => {
+  switch (o) {
+    case "NORMAL":
+      return "ROTATED_90";
+    case "ROTATED_90":
+      return "FLIPPED_YZ";
+    case "FLIPPED_YZ":
+      return "NORMAL";
+  }
+};
+
 export const FieldArea = ({ boxes, setBoxes }: Props) => {
   const fieldSize_mm = 8000;
   const scale = 0.1;
@@ -29,35 +42,45 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
       if (!moving) return prev;
 
       const spec = BOX_SPECS[moving.type];
+      const size = getFootprintSizeMm(spec, moving.orientation);
 
       const nextRect = {
         x: nextPos.x,
         y: nextPos.y,
-        w: spec.sizeMm.x,
-        h: spec.sizeMm.y,
+        w: size.w,
+        h: size.h,
       };
 
       const hit = prev.some((b) => {
         if (b.id === id) return false;
         const s = BOX_SPECS[b.type];
+        const otherSize = getFootprintSizeMm(s, b.orientation);
         return isOverlap(nextRect, {
           x: b.pos.x,
           y: b.pos.y,
-          w: s.sizeMm.x,
-          h: s.sizeMm.y,
+          w: otherSize.w,
+          h: otherSize.h,
         });
       });
 
-      if (hit) {
-        return prev;
-      }
+      if (hit) return prev;
 
       return prev.map((b) => (b.id === id ? { ...b, pos: nextPos } : b));
     });
   };
 
-  const updateBoxRotation = (id: number, rotation: number) => {
-    setBoxes((prev) => prev.map((b) => (b.id === id ? { ...b, rotation } : b)));
+  const rotateByDoubleClick = (id: number) => {
+    setBoxes((prev) =>
+      prev.map((b) => {
+        if (b.id !== id) return b;
+        const next = nextOrientation(b.orientation);
+        return {
+          ...b,
+          orientation: next,
+          rotation: next === "NORMAL" ? 0 : 90,
+        };
+      })
+    );
   };
 
   return (
@@ -78,7 +101,7 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
             scale={scale}
             fieldSize_mm={fieldSize_mm}
             onMove={(pos) => tryMoveBox(b.id, pos)}
-            onRotate={(deg) => updateBoxRotation(b.id, deg)}
+            onRotate={() => rotateByDoubleClick(b.id)}
           />
         );
       })}
