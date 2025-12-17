@@ -97,7 +97,7 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
             key={b.id}
             spec={spec}
             position={b.pos}
-            rotation={b.rotation}
+            orientation={b.orientation}
             scale={scale}
             fieldSize_mm={fieldSize_mm}
             onMove={(pos) => tryMoveBox(b.id, pos)}

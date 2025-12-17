@@ -1,11 +1,13 @@
 import { Box, Text } from "@chakra-ui/react";
 import { useState, useCallback, useRef } from "react";
 import type { BoxSpec, Position } from "./BoxType";
+import type { BoxOrientation } from "../FieldLayout/FieldLayout";
+import { getFootprintSizeMm } from "./utils";
 
 type Props = {
   spec: BoxSpec;
   position: Position;
-  rotation: number;
+  orientation: BoxOrientation;
   scale: number;
   fieldSize_mm: number;
   onMove: (pos: Position) => void;
@@ -15,14 +17,16 @@ type Props = {
 export const FieldBox = ({
   spec,
   position,
-  rotation,
+  orientation,
   scale,
   fieldSize_mm,
   onMove,
   onRotate,
 }: Props) => {
-  const sizePxX = spec.sizeMm.x * scale;
-  const sizePxY = spec.sizeMm.y * scale;
+  const footprint = getFootprintSizeMm(spec, orientation);
+
+  const sizePxX = footprint.w * scale;
+  const sizePxY = footprint.h * scale;
 
   const leftPx = position.x * scale;
   const bottomPx = position.y * scale;
@@ -53,22 +57,17 @@ export const FieldBox = ({
 
       const xMm = Math.max(
         0,
-        Math.min(fieldSize_mm - spec.sizeMm.x, xPx / scale)
+        Math.min(fieldSize_mm - footprint.w, xPx / scale)
       );
       const yMm = Math.max(
         0,
-        Math.min(fieldSize_mm - spec.sizeMm.y, yPx / scale)
+        Math.min(fieldSize_mm - footprint.h, yPx / scale)
       );
 
       onMove({ x: xMm, y: yMm });
     },
-    [dragging, fieldSize_mm, scale, spec, onMove]
+    [dragging, fieldSize_mm, scale, footprint, onMove]
   );
-
-  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    setDragging(false);
-  };
 
   return (
     <Box
@@ -80,13 +79,11 @@ export const FieldBox = ({
       bg={spec.color}
       opacity={0.8}
       border="2px solid white"
-      transform={`rotate(${rotation}deg)`}
-      transformOrigin="center"
       cursor="grab"
       userSelect="none"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
+      onPointerUp={() => setDragging(false)}
       onDoubleClick={(e) => {
         e.stopPropagation();
         onRotate();
