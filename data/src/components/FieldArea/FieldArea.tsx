@@ -1,8 +1,9 @@
 import { Box } from "@chakra-ui/react";
-import type { FieldBoxState, BoxOrientation } from "../FieldLayout/FieldLayout";
-import { BOX_SPECS, type Position } from "../FieldBox/BoxType";
+import type { Position } from "../FieldBox/BoxType";
+import { BOX_SPECS } from "../FieldBox/BoxType";
 import { FieldBox } from "../FieldBox/FieldBox";
 import { getFootprintSizeMm } from "../FieldBox/utils";
+import type { FieldBoxState, BoxOrientation } from "../types/FieldBoxState";
 
 type Props = {
   boxes: FieldBoxState[];
@@ -12,14 +13,13 @@ type Props = {
 const isOverlap = (
   a: { x: number; y: number; w: number; h: number },
   b: { x: number; y: number; w: number; h: number }
-) => {
-  return !(
+) =>
+  !(
     a.x + a.w <= b.x ||
     a.x >= b.x + b.w ||
     a.y + a.h <= b.y ||
     a.y >= b.y + b.h
   );
-};
 
 const nextOrientation = (o: BoxOrientation): BoxOrientation => {
   switch (o) {
@@ -54,12 +54,12 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
       const hit = prev.some((b) => {
         if (b.id === id) return false;
         const s = BOX_SPECS[b.type];
-        const otherSize = getFootprintSizeMm(s, b.orientation);
+        const other = getFootprintSizeMm(s, b.orientation);
         return isOverlap(nextRect, {
           x: b.pos.x,
           y: b.pos.y,
-          w: otherSize.w,
-          h: otherSize.h,
+          w: other.w,
+          h: other.h,
         });
       });
 
@@ -69,16 +69,24 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
     });
   };
 
-  const rotateByDoubleClick = (id: number) => {
+  const rotateBox = (id: number) => {
+    setBoxes((prev) =>
+      prev.map((b) =>
+        b.id === id ? { ...b, orientation: nextOrientation(b.orientation) } : b
+      )
+    );
+  };
+
+  const setRole = (id: number, role: "START" | "GOAL") => {
     setBoxes((prev) =>
       prev.map((b) => {
-        if (b.id !== id) return b;
-        const next = nextOrientation(b.orientation);
-        return {
-          ...b,
-          orientation: next,
-          rotation: next === "NORMAL" ? 0 : 90,
-        };
+        if (b.role === role && b.id !== id) {
+          return { ...b, role: undefined };
+        }
+        if (b.id === id) {
+          return { ...b, role };
+        }
+        return b;
       })
     );
   };
@@ -92,16 +100,19 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
     >
       {boxes.map((b) => {
         const spec = BOX_SPECS[b.type];
+
         return (
           <FieldBox
             key={b.id}
             spec={spec}
             position={b.pos}
             orientation={b.orientation}
+            role={b.role}
             scale={scale}
             fieldSize_mm={fieldSize_mm}
             onMove={(pos) => tryMoveBox(b.id, pos)}
-            onRotate={() => rotateByDoubleClick(b.id)}
+            onRotate={() => rotateBox(b.id)}
+            onSetRole={(role) => setRole(b.id, role)}
           />
         );
       })}

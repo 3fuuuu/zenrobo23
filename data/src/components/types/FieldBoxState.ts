@@ -1,12 +1,11 @@
 import type { Position } from "../FieldBox/BoxType";
-import type { BOX_SPECS } from "../FieldBox/BoxType";
 
-export type Orientation = "XY" | "XZ";
+export type BoxOrientation = "NORMAL" | "ROTATED_90" | "FLIPPED_YZ";
 
 export type FieldBoxState = {
   id: number;
-  type: keyof typeof BOX_SPECS;
+  type: string;
   pos: Position;
-  rotation: 0 | 90 | 180 | 270;
-  orientation: Orientation;
+  orientation: BoxOrientation;
+  role?: "START" | "GOAL";
 };

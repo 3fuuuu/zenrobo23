@@ -1,7 +1,7 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Text, Button, VStack } from "@chakra-ui/react";
 import { useState, useCallback, useRef } from "react";
 import type { BoxSpec, Position } from "./BoxType";
-import type { BoxOrientation } from "../FieldLayout/FieldLayout";
+import type { BoxOrientation } from "../types/FieldBoxState";
 import { getFootprintSizeMm } from "./utils";
 
 type Props = {
@@ -10,8 +10,10 @@ type Props = {
   orientation: BoxOrientation;
   scale: number;
   fieldSize_mm: number;
+  role?: "START" | "GOAL";
   onMove: (pos: Position) => void;
   onRotate: () => void;
+  onSetRole: (role: "START" | "GOAL") => void;
 };
 
 export const FieldBox = ({
@@ -20,18 +22,20 @@ export const FieldBox = ({
   orientation,
   scale,
   fieldSize_mm,
+  role,
   onMove,
   onRotate,
+  onSetRole,
 }: Props) => {
   const footprint = getFootprintSizeMm(spec, orientation);
 
   const sizePxX = footprint.w * scale;
   const sizePxY = footprint.h * scale;
-
   const leftPx = position.x * scale;
   const bottomPx = position.y * scale;
 
   const [dragging, setDragging] = useState(false);
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const offsetRef = useRef({ x: 0, y: 0 });
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -77,8 +81,8 @@ export const FieldBox = ({
       width={`${sizePxX}px`}
       height={`${sizePxY}px`}
       bg={spec.color}
-      opacity={0.8}
       border="2px solid white"
+      opacity={0.85}
       cursor="grab"
       userSelect="none"
       onPointerDown={onPointerDown}
@@ -88,10 +92,80 @@ export const FieldBox = ({
         e.stopPropagation();
         onRotate();
       }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowRoleMenu((v) => !v);
+      }}
     >
       <Text fontWeight="bold" textAlign="center" color="white">
         {spec.type}
       </Text>
+
+      {showRoleMenu && (
+        <VStack
+          position="absolute"
+          top="-44px"
+          left="50%"
+          transform="translateX(-50%)"
+          bg="white"
+          border="1px solid gray"
+          p={1}
+          gap={1}
+          zIndex={10}
+        >
+          <Button
+            size="xs"
+            onClick={() => {
+              onSetRole("START");
+              setShowRoleMenu(false);
+            }}
+          >
+            START
+          </Button>
+          <Button
+            size="xs"
+            onClick={() => {
+              onSetRole("GOAL");
+              setShowRoleMenu(false);
+            }}
+          >
+            GOAL
+          </Button>
+        </VStack>
+      )}
+
+      {role === "START" && (
+        <Box
+          position="absolute"
+          bottom="-26px"
+          left="50%"
+          transform="translateX(-50%)"
+          bg="green.400"
+          color="white"
+          px={2}
+          fontSize="xs"
+          borderRadius="md"
+        >
+          START
+        </Box>
+      )}
+
+      {role === "GOAL" && (
+        <Box
+          position="absolute"
+          top="-26px"
+          left="50%"
+          transform="translateX(-50%)"
+          bg="red.400"
+          color="white"
+          px={2}
+          fontSize="xs"
+          borderRadius="md"
+        >
+          GOAL
+        </Box>
+      )}
     </Box>
   );
 };

@@ -1,17 +1,8 @@
 import { Box, VStack, Text } from "@chakra-ui/react";
 import { useState, useRef } from "react";
-import { BOX_SPECS, type Position } from "../FieldBox/BoxType";
+import { BOX_SPECS } from "../FieldBox/BoxType";
 import { FieldArea } from "../FieldArea/FieldArea";
-
-export type BoxOrientation = "NORMAL" | "ROTATED_90" | "FLIPPED_YZ";
-
-export type FieldBoxState = {
-  id: number;
-  type: keyof typeof BOX_SPECS;
-  pos: Position;
-  rotation: number;
-  orientation: BoxOrientation;
-};
+import type { FieldBoxState } from "../types/FieldBoxState";
 
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);
