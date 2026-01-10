@@ -1,14 +1,15 @@
-export type MoveCommand = {
-  type: "MOVE";
-  x: number; // mm
-  y: number; // mm
+export type Command =
+  | {
+      type: "MOVE";
+      x: number; // mm
+      y: number; // mm
+    }
+  | {
+      type: "WAIT";
+      ms: number;
+    };
+
+export type Sequence = {
+  version: 1;
+  commands: Command[];
 };
-
-export type WaitCommand = {
-  type: "WAIT";
-  ms: number;
-};
-
-export type Command = MoveCommand | WaitCommand;
-
-export type Sequence = Command[];
