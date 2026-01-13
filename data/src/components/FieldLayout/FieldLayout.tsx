@@ -6,12 +6,13 @@ import type { FieldBoxState } from "../types/FieldBoxState";
 import { buildGraph } from "../../logic/Route/graph";
 import { bfs, type PathNode } from "../../logic/BFS";
 import { Robot } from "../Robot/Robot";
-import { pathToSequence } from "../types/pathToSequence";
-import { sendESP32 } from "../../logic/SendESP32";
+import { pathToSequence } from "../../logic/sequence/pathToSequence";
+import { sendESP32 } from "../../api/SendESP32";
 
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);
   const [path, setPath] = useState<PathNode[]>([]);
+  4;
   const idCounterRef = useRef(1);
 
   const FIELD_MM = 7000;
@@ -48,7 +49,6 @@ export const FieldLayout = () => {
 
   return (
     <Box display="flex" width="100vw" height="100vh" overflow="hidden">
-      {/* 左：Box Palette */}
       <VStack flex="1" minW="180px" bg="gray.800" p={4} align="stretch">
         <Text color="white" fontWeight="bold">
           Box Palette
@@ -75,7 +75,6 @@ export const FieldLayout = () => {
         </Button>
       </VStack>
 
-      {/* 中央：Field */}
       <Box
         flex="0 0 700px"
         display="flex"
@@ -87,7 +86,6 @@ export const FieldLayout = () => {
         <Robot path={path} scale={scale} fieldHeightPx={FIELD_PX} />
       </Box>
 
-      {/* 右：Box Positions（復活） */}
       <VStack
         flex="1"
         minW="250px"

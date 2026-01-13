@@ -1,6 +1,6 @@
-import type { FieldBoxState } from "../types/FieldBoxState";
-import { BOX_SPECS } from "../FieldBox/BoxType";
-import { getFootprintSizeMm } from "../FieldBox/utils";
+import type { FieldBoxState } from "../../components/types/FieldBoxState";
+import { BOX_SPECS } from "../../components/FieldBox/BoxType";
+import { getFootprintSizeMm } from "../../components/FieldBox/utils";
 import { canPath } from "./canPath";
 
 export type Graph = Map<number, number[]>;

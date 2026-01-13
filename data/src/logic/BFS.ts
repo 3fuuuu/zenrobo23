@@ -1,7 +1,7 @@
-import { BOX_SPECS } from "../FieldBox/BoxType";
-import { getFootprintSizeMm } from "../FieldBox/utils";
-import type { Graph } from "../Route/graph";
-import type { FieldBoxState } from "../types/FieldBoxState";
+import { BOX_SPECS } from "../components/FieldBox/BoxType";
+import { getFootprintSizeMm } from "../components/FieldBox/utils";
+import type { Graph } from "./Route/graph";
+import type { FieldBoxState } from "../components/types/FieldBoxState";
 
 export type PathNode = {
   x: number;
