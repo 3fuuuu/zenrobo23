@@ -3,11 +3,11 @@ import { useState, useRef } from "react";
 import { BOX_SPECS } from "../FieldBox/BoxType";
 import { FieldArea } from "../FieldArea/FieldArea";
 import type { FieldBoxState } from "../types/FieldBoxState";
-import { buildGraph } from "../Route/graph";
-import { bfs, type PathNode } from "../types/BFS";
+import { buildGraph } from "../../logic/Route/graph";
+import { bfs, type PathNode } from "../../logic/BFS";
 import { Robot } from "../Robot/Robot";
 import { pathToSequence } from "../types/pathToSequence";
-import { sendESP32 } from "../../api/SendESP32";
+import { sendESP32 } from "../../logic/SendESP32";
 
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);

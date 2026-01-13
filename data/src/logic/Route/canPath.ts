@@ -1,29 +1,15 @@
 export const GAP_MM = 40;
 
-export type Rect = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
+export type Rect = { x: number; y: number; w: number; h: number };
 
-export const canPath = (a: Rect, b: Rect): boolean => {
-  const aRight = a.x + a.w;
-  const aTop = a.y + a.h;
-  const bRight = b.x + b.w;
-  const bTop = b.y + b.h;
-
-  const horizontalGap =
-    Math.abs(aRight - b.x) <= GAP_MM || Math.abs(bRight - a.x) <= GAP_MM;
-
-  const verticalOverlap = !(aTop < b.y || a.y > bTop);
-
-  const verticalGap =
-    Math.abs(aTop - b.y) <= GAP_MM || Math.abs(bTop - a.y) <= GAP_MM;
-
-  const horizontalOverlap = !(aRight < b.x || a.x > bRight);
+export const canPath = (a: Rect, b: Rect) => {
+  const ax2 = a.x + a.w;
+  const ay2 = a.y + a.h;
+  const bx2 = b.x + b.w;
+  const by2 = b.y + b.h;
 
   return (
-    (horizontalGap && verticalOverlap) || (verticalGap && horizontalOverlap)
+    (Math.abs(ax2 - b.x) <= GAP_MM || Math.abs(bx2 - a.x) <= GAP_MM) &&
+    !(ay2 < b.y || a.y > by2)
   );
 };
