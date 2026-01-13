@@ -1,33 +1,30 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-type PathNode = {
-  x: number; // mm
-  y: number; // mm
-};
+export type PathNode = { x: number; y: number };
 
-type Props = {
+export const Robot = ({
+  path,
+  scale,
+  fieldHeightPx,
+}: {
   path: PathNode[];
   scale: number;
-};
-
-export const Robot = ({ path, scale }: Props) => {
-  const [index, setIndex] = useState(0);
+  fieldHeightPx: number;
+}) => {
+  const [i, setI] = useState(0);
 
   useEffect(() => {
-    if (!path.length) return;
-    if (index >= path.length - 1) return;
-
-    const t = setTimeout(() => {
-      setIndex((i) => i + 1);
-    }, 800);
-
+    if (i >= path.length - 1) return;
+    const t = setTimeout(() => setI((v) => v + 1), 800);
     return () => clearTimeout(t);
-  }, [index, path]);
+  }, [i, path]);
 
   if (!path.length) return null;
+  const p = path[i];
 
-  const node = path[index];
+  const x = p.x * scale;
+  const y = fieldHeightPx - p.y * scale;
 
   return (
     <motion.div
@@ -36,19 +33,15 @@ export const Robot = ({ path, scale }: Props) => {
         width: 20,
         height: 20,
         borderRadius: "50%",
-        backgroundColor: "red",
-        left: node.x * scale - 10,
-        bottom: node.y * scale - 10,
-        zIndex: 100,
+        background: "red",
+        left: x - 10,
+        top: y - 10,
       }}
       animate={{
-        left: node.x * scale - 10,
-        bottom: node.y * scale - 10,
+        left: x - 10,
+        top: y - 10,
       }}
-      transition={{
-        duration: 0.7,
-        ease: "linear",
-      }}
+      transition={{ duration: 0.7, ease: "linear" }}
     />
   );
 };

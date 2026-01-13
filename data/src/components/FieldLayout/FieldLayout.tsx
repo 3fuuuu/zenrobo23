@@ -1,12 +1,22 @@
-import { Box, VStack, Text } from "@chakra-ui/react";
+import { Box, VStack, Text, Button } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { BOX_SPECS } from "../FieldBox/BoxType";
 import { FieldArea } from "../FieldArea/FieldArea";
 import type { FieldBoxState } from "../types/FieldBoxState";
+import { buildGraph } from "../Route/graph";
+import { bfs, type PathNode } from "../types/BFS";
+import { Robot } from "../Robot/Robot";
+import { pathToSequence } from "../types/pathToSequence";
+import { sendESP32 } from "../../api/SendESP32";
 
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);
+  const [path, setPath] = useState<PathNode[]>([]);
   const idCounterRef = useRef(1);
+
+  const FIELD_MM = 7000;
+  const FIELD_PX = 700;
+  const scale = FIELD_PX / FIELD_MM;
 
   const addBox = (type: keyof typeof BOX_SPECS) => {
     setBoxes((prev) => [
@@ -21,8 +31,24 @@ export const FieldLayout = () => {
     ]);
   };
 
+  const onStart = async () => {
+    const start = boxes.find((b) => b.role === "START");
+    const goal = boxes.find((b) => b.role === "GOAL");
+    if (!start || !goal) return;
+
+    const graph = buildGraph(boxes);
+    const pathNodes = bfs(graph, boxes, start.id, goal.id);
+    if (!pathNodes.length) return;
+
+    setPath(pathNodes);
+
+    const sequence = pathToSequence(pathNodes);
+    await sendESP32(sequence);
+  };
+
   return (
     <Box display="flex" width="100vw" height="100vh" overflow="hidden">
+      {/* 左：Box Palette */}
       <VStack flex="1" minW="180px" bg="gray.800" p={4} align="stretch">
         <Text color="white" fontWeight="bold">
           Box Palette
@@ -43,17 +69,25 @@ export const FieldLayout = () => {
             {key}
           </Box>
         ))}
+
+        <Button mt={4} colorScheme="green" onClick={onStart}>
+          START
+        </Button>
       </VStack>
 
+      {/* 中央：Field */}
       <Box
         flex="0 0 700px"
         display="flex"
         alignItems="center"
         justifyContent="center"
+        position="relative"
       >
         <FieldArea boxes={boxes} setBoxes={setBoxes} />
+        <Robot path={path} scale={scale} fieldHeightPx={FIELD_PX} />
       </Box>
 
+      {/* 右：Box Positions（復活） */}
       <VStack
         flex="1"
         minW="250px"
@@ -82,6 +116,7 @@ export const FieldLayout = () => {
               <Text>X: {b.pos.x.toFixed(0)} mm</Text>
               <Text>Y: {b.pos.y.toFixed(0)} mm</Text>
               <Text>Orientation: {b.orientation}</Text>
+              {b.role && <Text>Role: {b.role}</Text>}
             </Box>
           );
         })}
