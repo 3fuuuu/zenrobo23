@@ -12,7 +12,6 @@ import { sendESP32 } from "../../api/SendESP32";
 export const FieldLayout = () => {
   const [boxes, setBoxes] = useState<FieldBoxState[]>([]);
   const [path, setPath] = useState<PathNode[]>([]);
-  4;
   const idCounterRef = useRef(1);
 
   const FIELD_MM = 7000;
@@ -35,11 +34,22 @@ export const FieldLayout = () => {
   const onStart = async () => {
     const start = boxes.find((b) => b.role === "START");
     const goal = boxes.find((b) => b.role === "GOAL");
-    if (!start || !goal) return;
+
+    if (!start || !goal) {
+      alert("START と GOAL を指定してください");
+      return;
+    }
 
     const graph = buildGraph(boxes);
+    console.log("GRAPH", graph);
+
     const pathNodes = bfs(graph, boxes, start.id, goal.id);
-    if (!pathNodes.length) return;
+    console.log("PATH", pathNodes);
+
+    if (!pathNodes.length) {
+      alert("経路が見つかりません");
+      return;
+    }
 
     setPath(pathNodes);
 

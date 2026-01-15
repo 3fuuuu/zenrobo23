@@ -6,39 +6,32 @@ import { canPath } from "./canPath";
 export type Graph = Map<number, number[]>;
 
 export const buildGraph = (boxes: FieldBoxState[]): Graph => {
-  const graph: Graph = new Map();
+  const g: Graph = new Map();
 
   boxes.forEach((a) => {
-    graph.set(a.id, []);
-
-    const specA = BOX_SPECS[a.type];
-    const sizeA = getFootprintSizeMm(specA, a.orientation);
-
-    const rectA = {
-      x: a.pos.x,
-      y: a.pos.y,
-      w: sizeA.w,
-      h: sizeA.h,
-    };
+    g.set(a.id, []);
+    const sa = getFootprintSizeMm(
+      BOX_SPECS[a.type as keyof typeof BOX_SPECS],
+      a.orientation
+    );
 
     boxes.forEach((b) => {
       if (a.id === b.id) return;
+      const sb = getFootprintSizeMm(
+        BOX_SPECS[b.type as keyof typeof BOX_SPECS],
+        b.orientation
+      );
 
-      const specB = BOX_SPECS[b.type];
-      const sizeB = getFootprintSizeMm(specB, b.orientation);
-
-      const rectB = {
-        x: b.pos.x,
-        y: b.pos.y,
-        w: sizeB.w,
-        h: sizeB.h,
-      };
-
-      if (canPath(rectA, rectB)) {
-        graph.get(a.id)!.push(b.id);
+      if (
+        canPath(
+          { x: a.pos.x, y: a.pos.y, w: sa.w, h: sa.h },
+          { x: b.pos.x, y: b.pos.y, w: sb.w, h: sb.h }
+        )
+      ) {
+        g.get(a.id)!.push(b.id);
       }
     });
   });
 
-  return graph;
+  return g;
 };

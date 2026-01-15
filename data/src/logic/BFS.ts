@@ -1,12 +1,9 @@
-import { BOX_SPECS } from "../components/FieldBox/BoxType";
-import { getFootprintSizeMm } from "../components/FieldBox/utils";
 import type { Graph } from "./Route/graph";
 import type { FieldBoxState } from "../components/types/FieldBoxState";
+import { BOX_SPECS } from "../components/FieldBox/BoxType";
+import { getFootprintSizeMm } from "../components/FieldBox/utils";
 
-export type PathNode = {
-  x: number;
-  y: number;
-};
+export type PathNode = { x: number; y: number };
 
 export const bfs = (
   graph: Graph,
@@ -14,18 +11,17 @@ export const bfs = (
   startId: number,
   goalId: number
 ): PathNode[] => {
-  const queue: number[] = [startId];
+  const q = [startId];
   const prev = new Map<number, number | null>();
   prev.set(startId, null);
 
-  while (queue.length) {
-    const cur = queue.shift()!;
+  while (q.length) {
+    const cur = q.shift()!;
     if (cur === goalId) break;
-
-    for (const next of graph.get(cur) ?? []) {
-      if (!prev.has(next)) {
-        prev.set(next, cur);
-        queue.push(next);
+    for (const n of graph.get(cur) ?? []) {
+      if (!prev.has(n)) {
+        prev.set(n, cur);
+        q.push(n);
       }
     }
   }
@@ -36,15 +32,12 @@ export const bfs = (
   let cur: number | null = goalId;
 
   while (cur !== null) {
-    const box = boxes.find((b) => b.id === cur)!;
-    const spec = BOX_SPECS[box.type];
-    const size = getFootprintSizeMm(spec, box.orientation);
-
-    path.push({
-      x: box.pos.x + size.w / 2,
-      y: box.pos.y + size.h / 2,
-    });
-
+    const b = boxes.find((x) => x.id === cur)!;
+    const size = getFootprintSizeMm(
+      BOX_SPECS[b.type as keyof typeof BOX_SPECS],
+      b.orientation
+    );
+    path.push({ x: b.pos.x + size.w / 2, y: b.pos.y + size.h / 2 });
     cur = prev.get(cur)!;
   }
 

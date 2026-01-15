@@ -1,47 +1,73 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-export type PathNode = { x: number; y: number };
+export type PathNode = {
+  x: number; // mm
+  y: number; // mm
+};
 
-export const Robot = ({
-  path,
-  scale,
-  fieldHeightPx,
-}: {
+type Props = {
   path: PathNode[];
   scale: number;
   fieldHeightPx: number;
-}) => {
-  const [i, setI] = useState(0);
+};
+
+const ROBOT_SIZE_PX = 20;
+
+export const Robot = ({ path, scale, fieldHeightPx }: Props) => {
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (i >= path.length - 1) return;
-    const t = setTimeout(() => setI((v) => v + 1), 800);
+    if (path.length === 0) return;
+    setIndex(0);
+  }, [path]);
+
+  useEffect(() => {
+    if (index >= path.length - 1) return;
+
+    const t = setTimeout(() => {
+      setIndex((i) => i + 1);
+    }, 800);
+
     return () => clearTimeout(t);
-  }, [i, path]);
+  }, [index, path]);
 
   if (!path.length) return null;
-  const p = path[i];
 
-  const x = p.x * scale;
-  const y = fieldHeightPx - p.y * scale;
+  const p = path[index];
+
+  // mm → px（FieldBoxと同一座標系）
+  const leftPx = p.x * scale - ROBOT_SIZE_PX / 2;
+  const bottomPx = p.y * scale - ROBOT_SIZE_PX / 2;
+
+  // フィールド外に出ない保険
+  const clampedLeft = Math.max(0, leftPx);
+  const clampedBottom = Math.max(
+    0,
+    Math.min(fieldHeightPx - ROBOT_SIZE_PX, bottomPx)
+  );
 
   return (
     <motion.div
       style={{
         position: "absolute",
-        width: 20,
-        height: 20,
+        width: ROBOT_SIZE_PX,
+        height: ROBOT_SIZE_PX,
         borderRadius: "50%",
-        background: "red",
-        left: x - 10,
-        top: y - 10,
+        backgroundColor: "red",
+        zIndex: 100,
+        left: clampedLeft,
+        bottom: clampedBottom,
+        pointerEvents: "none",
       }}
       animate={{
-        left: x - 10,
-        top: y - 10,
+        left: clampedLeft,
+        bottom: clampedBottom,
       }}
-      transition={{ duration: 0.7, ease: "linear" }}
+      transition={{
+        duration: 0.7,
+        ease: "linear",
+      }}
     />
   );
 };

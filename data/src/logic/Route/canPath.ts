@@ -1,4 +1,4 @@
-export const GAP_MM = 40;
+export const GAP_MM = 60;
 
 export type Rect = { x: number; y: number; w: number; h: number };
 
