@@ -34,22 +34,11 @@ export const FieldLayout = () => {
   const onStart = async () => {
     const start = boxes.find((b) => b.role === "START");
     const goal = boxes.find((b) => b.role === "GOAL");
-
-    if (!start || !goal) {
-      alert("START と GOAL を指定してください");
-      return;
-    }
+    if (!start || !goal) return;
 
     const graph = buildGraph(boxes);
-    console.log("GRAPH", graph);
-
     const pathNodes = bfs(graph, boxes, start.id, goal.id);
-    console.log("PATH", pathNodes);
-
-    if (!pathNodes.length) {
-      alert("経路が見つかりません");
-      return;
-    }
+    if (!pathNodes.length) return;
 
     setPath(pathNodes);
 
@@ -90,10 +79,10 @@ export const FieldLayout = () => {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        position="relative"
       >
-        <FieldArea boxes={boxes} setBoxes={setBoxes} />
-        <Robot path={path} scale={scale} fieldHeightPx={FIELD_PX} />
+        <FieldArea boxes={boxes} setBoxes={setBoxes}>
+          <Robot path={path} scale={scale} />
+        </FieldArea>
       </Box>
 
       <VStack

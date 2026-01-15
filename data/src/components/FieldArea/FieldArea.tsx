@@ -8,6 +8,7 @@ import type { FieldBoxState, BoxOrientation } from "../types/FieldBoxState";
 type Props = {
   boxes: FieldBoxState[];
   setBoxes: React.Dispatch<React.SetStateAction<FieldBoxState[]>>;
+  children?: React.ReactNode;
 };
 
 const isOverlap = (
@@ -32,8 +33,8 @@ const nextOrientation = (o: BoxOrientation): BoxOrientation => {
   }
 };
 
-export const FieldArea = ({ boxes, setBoxes }: Props) => {
-  const fieldSize_mm = 8000;
+export const FieldArea = ({ boxes, setBoxes, children }: Props) => {
+  const fieldSize_mm = 7000;
   const scale = 0.1;
 
   const tryMoveBox = (id: number, nextPos: Position) => {
@@ -116,6 +117,7 @@ export const FieldArea = ({ boxes, setBoxes }: Props) => {
           />
         );
       })}
+      {children}
     </Box>
   );
 };

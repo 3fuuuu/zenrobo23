@@ -6,10 +6,11 @@ import { canPath } from "./canPath";
 export type Graph = Map<number, number[]>;
 
 export const buildGraph = (boxes: FieldBoxState[]): Graph => {
-  const g: Graph = new Map();
+  const graph: Graph = new Map();
 
   boxes.forEach((a) => {
-    g.set(a.id, []);
+    graph.set(a.id, []);
+
     const sa = getFootprintSizeMm(
       BOX_SPECS[a.type as keyof typeof BOX_SPECS],
       a.orientation
@@ -17,6 +18,7 @@ export const buildGraph = (boxes: FieldBoxState[]): Graph => {
 
     boxes.forEach((b) => {
       if (a.id === b.id) return;
+
       const sb = getFootprintSizeMm(
         BOX_SPECS[b.type as keyof typeof BOX_SPECS],
         b.orientation
@@ -28,10 +30,10 @@ export const buildGraph = (boxes: FieldBoxState[]): Graph => {
           { x: b.pos.x, y: b.pos.y, w: sb.w, h: sb.h }
         )
       ) {
-        g.get(a.id)!.push(b.id);
+        graph.get(a.id)!.push(b.id);
       }
     });
   });
 
-  return g;
+  return graph;
 };

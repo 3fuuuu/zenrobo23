@@ -9,12 +9,11 @@ export type PathNode = {
 type Props = {
   path: PathNode[];
   scale: number;
-  fieldHeightPx: number;
 };
 
 const ROBOT_SIZE_PX = 20;
 
-export const Robot = ({ path, scale, fieldHeightPx }: Props) => {
+export const Robot = ({ path, scale }: Props) => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -36,16 +35,8 @@ export const Robot = ({ path, scale, fieldHeightPx }: Props) => {
 
   const p = path[index];
 
-  // mm → px（FieldBoxと同一座標系）
   const leftPx = p.x * scale - ROBOT_SIZE_PX / 2;
-  const bottomPx = p.y * scale - ROBOT_SIZE_PX / 2;
-
-  // フィールド外に出ない保険
-  const clampedLeft = Math.max(0, leftPx);
-  const clampedBottom = Math.max(
-    0,
-    Math.min(fieldHeightPx - ROBOT_SIZE_PX, bottomPx)
-  );
+  const bottomPx = index === 0 ? 0 : p.y * scale - ROBOT_SIZE_PX / 2;
 
   return (
     <motion.div
@@ -56,13 +47,13 @@ export const Robot = ({ path, scale, fieldHeightPx }: Props) => {
         borderRadius: "50%",
         backgroundColor: "red",
         zIndex: 100,
-        left: clampedLeft,
-        bottom: clampedBottom,
+        left: leftPx,
+        bottom: bottomPx,
         pointerEvents: "none",
       }}
       animate={{
-        left: clampedLeft,
-        bottom: clampedBottom,
+        left: leftPx,
+        bottom: bottomPx,
       }}
       transition={{
         duration: 0.7,
